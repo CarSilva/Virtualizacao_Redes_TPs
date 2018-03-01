@@ -4,7 +4,7 @@ services:
    image: postgres
    restart: always
    volumes:
-     - /home/pedrocunha/Desktop/Virtualiza-o_Redes_TPs/tp1/postgres_data:/data/db
+     - /home/$USER/Desktop/Virtualiza-o_Redes_TPs/tp1/postgres_data:/data/db
    networks:
      - network_1
  auth_service:
@@ -13,7 +13,7 @@ services:
    ports:
      - '8888:80'
    volumes:
-     - /home/pedrocunha/Desktop/Virtualiza-o_Redes_TPs/tp1/authentication_service:/var/www/html
+     - /home/$USER/Desktop/Virtualiza-o_Redes_TPs/tp1/authentication_service:/var/www/html
    networks:
      - network_1
      - network_2
@@ -23,7 +23,7 @@ services:
    ports:
      - '8889:80'
    volumes:
-     - /home/pedrocunha/Desktop/Virtualiza-o_Redes_TPs/tp1/mail_service:/var/www/html
+     - /home/$USER/Desktop/Virtualiza-o_Redes_TPs/tp1/mail_service:/var/www/html
    networks:
      - network_2
      - network_3
