@@ -4,14 +4,16 @@ services:
    image: postgres
    restart: always
    volumes:
-     - /home/pedrocunha/Desktop/TP1-VR/postgres_data:/data/db
+     - /home/pedrocunha/Desktop/Virtualiza-o_Redes_TPs/tp1/postgres_data:/data/db
+   networks:
+     - network_1
  auth_service:
    image: php:7.0-apache
    restart: always
    ports:
      - '8888:80'
    volumes:
-     - /home/pedrocunha/Desktop/TP1-VR/authentication_service:/var/www/html
+     - /home/pedrocunha/Desktop/Virtualiza-o_Redes_TPs/tp1/authentication_service:/var/www/html
    networks:
      - network_1
      - network_2
@@ -21,20 +23,13 @@ services:
    ports:
      - '8889:80'
    volumes:
-     - /home/pedrocunha/Desktop/TP1-VR/mail_service:/var/www/html
+     - /home/pedrocunha/Desktop/Virtualiza-o_Redes_TPs/tp1/mail_service:/var/www/html
    networks:
      - network_2
      - network_3
- mail_server:
+ mail:
    image: namshi/smtp
    restart: always
-   expose:
-     - "587"
-   environment:
-     - SMARTHOST_ADDRESS=mail.mysmtp.com
-     - SMARTHOST_PORT=587
-     - SMARTHOST_USER=g1
-     - SMARTHOST_PASSWORD=g1
    networks:
      - network_3
 networks:
