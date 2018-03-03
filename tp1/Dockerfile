@@ -7,4 +7,3 @@ RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | \
    apt-key add -
 RUN apt-get update
 RUN apt-get install -y postgresql-client-9.6
-COPY src/ /var/www/html

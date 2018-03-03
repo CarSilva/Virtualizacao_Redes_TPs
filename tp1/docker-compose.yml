@@ -8,8 +8,7 @@ services:
    networks:
      - network_1
  auth:
-   image: php:7.0-apache
-   build: /home/$USER/Virtualiza-o_Redes_TPs/tp1
+   build: .
    restart: always
    ports:
      - '8888:80'
