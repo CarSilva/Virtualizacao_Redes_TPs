@@ -1,3 +1,4 @@
+<?php ob_start(); ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -32,6 +33,12 @@ input[type=submit]:hover {
 h1 {
   text-align: center;
 }
+
+h2 {
+  text-align: center;
+  color: red;
+}
+
 .container {
     border-radius: 5px;
     background-color: #f2f2f2;
@@ -48,11 +55,32 @@ h1 {
   ?>" method = "post">
     <label for="token">Por favor insira o token de autenticação para ter acesso ao serviço:</label>
     <input type="text" id="token" name="token" placeholder="Token...">
-    <input type="submit" value="Submit" name="submit" formaction="email.php">
+    <input type="submit" value="Submit" name="submit">
   </form>
 </div>
 <?php
+if(isset($_POST['submit'])) {
 
+  $url = 'http://auth/server.php';
+  $ch = curl_init($url);
+  $data = array(
+    'token' => $_POST['token']
+   );
+  $payload = json_encode($data);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  $result = curl_exec($ch);
+  echo $result;
+  curl_close($ch);
+  if($result == 1) {
+    header("Location: http://localhost:8889/email.php");
+    die();
+  }
+  else {
+    echo "<h2>Erro de autenticação! O Token inserido não é válido</h2>";
+  }
+}
 ?>
 </body>
 </html>

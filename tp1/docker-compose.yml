@@ -7,7 +7,7 @@ services:
      - /home/$USER/Virtualiza-o_Redes_TPs/tp1/postgres_data:/var/lib/postgresql/data
    networks:
      - network_1
- auth_service:
+ auth:
    image: php:7.0-apache
    restart: always
    ports:
@@ -23,7 +23,7 @@ services:
    ports:
      - '8889:80'
    volumes:
-     - /home/$USER/Virtualiza-o_Redes_TPs/tp1/mail_service:/var/www/html  
+     - /home/$USER/Virtualiza-o_Redes_TPs/tp1/mail_service:/var/www/html
    networks:
      - network_2
      - network_3
@@ -32,6 +32,15 @@ services:
    restart: always
    networks:
      - network_3
+ #haproxy:
+#   image: haproxy:1.7
+#   restart: always
+#   ports:
+#     - '8080:80'
+#   volumes:
+#     - /home/$USER/Virtualiza-o_Redes_TPs/tp1/haproxy:/usr/local/etc/haproxy:ro
+#   networks:
+#     - network_2
 networks:
     network_1:
       driver: bridge
