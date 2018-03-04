@@ -5,8 +5,19 @@
 ?>
 
 <?
-   // error_reporting(E_ALL);
-   // ini_set("display_errors", 1);
+  function  insert_into_table($token, $name){
+    $dbuser = postgres;
+    $dbpass = postgres;
+    $conn;
+    try {
+      $conn = new PDO("pgsql:host=db;dbname=auth", $dbuser, $dbpass);
+    } catch (PDOException $e) {
+      die('Connection failed: ' . $e->getMessage());
+    }
+    $conn->beginTransaction();
+    $result = $conn->exec("INSERT INTO auth (token, name) VALUES ($token, $name)");
+    $conn->commit();
+  }
 ?>
 
 <html lang = "pt">
@@ -24,13 +35,7 @@
             $msg = '';
             $token = '';
             $login;
-            $dbuser = postgres;
-            $dbpass = postgres;
-            try {
-              $conn = new PDO("pgsql:host=db;port=5432;dbname=auth", $dbuser, $dbpass);
-            } catch (PDOException $e) {
-              die('Connection failed: ' . $e->getMessage());
-            }
+            //falta ir aqui buscar à bd
             if (isset($_POST['login']) && !empty($_POST['username']) && !empty($_POST['password'])) {
                if (!isset($login[$_POST['username']])){
                   $login[$_POST['username']] = $_POST['password'];
@@ -39,8 +44,10 @@
                   $_SESSION['timeout'] = time();
                   $_SESSION['username'] = $_POST['username'];
                   $token = bin2hex(random_bytes(32));
+                  insert_into_table($token, $_POST['username']);
 
                }
+               //pode nao fazer sentido já, VER depois de por a funcionar bd
                else if(!empty($login[$_POST['username']]) && $login[$_POST['username']] == $_POST['password']){
                   $_SESSION['valid'] = true;
                   $_SESSION['timeout'] = time();
