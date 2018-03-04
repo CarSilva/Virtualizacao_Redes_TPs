@@ -1,7 +1,6 @@
 <?php
    ob_start();
    session_start();
-  
 ?>
 
 <?
@@ -9,7 +8,7 @@
     $dbuser = postgres;
     $conn;
     try {
-      $conn = new PDO("pgsql:host=db;dbname=auth", $dbuser, $dbuser);
+      $conn = new PDO("pgsql:host=db;dbname=postgres", $dbuser, $dbuser);
     } catch (PDOException $e) {
       die('Connection failed: ' . $e->getMessage());
     }
@@ -42,15 +41,15 @@
 ?>
 
 <html lang = "pt">
-   
+
    <head>
 
       <link rel="stylesheet" type="text/css" href="style.css">
       <title>Serviço de Autenticação</title>
    </head>
-   
+
    <body>
-      <h1>Serviço de Autenticação</h1> 
+      <h1>Serviço de Autenticação</h1>
       <div class = "container form-signin">
          <?php
             $token = '';
@@ -74,9 +73,8 @@
             }
          ?>
       </div> <!-- /container -->
-      
+
       <div class = "container">
-         
          <form action = "<?php echo htmlspecialchars($_SERVER['PHP_SELF']);
            ?>" method = "post">
             <label for="fname">Username</label>
@@ -90,9 +88,9 @@
          <form action = "<?php echo htmlspecialchars($_SERVER['PHP_SELF']);
            ?>" method = "post">
             <label for="subject">Token:</label>
-            <textarea id="subject" name="mensagem" placeholder="Token..." style="height:35px"><?php echo $token; ?></textarea>  
-         </form>  
-      </div> 
-      
+            <textarea id="subject" name="mensagem" placeholder="Token..." style="height:35px"><?php echo $token; ?></textarea>
+         </form>
+      </div>
+
    </body>
 </html>

@@ -47,9 +47,7 @@ h2 {
 </style>
 </head>
 <body>
-
 <h1>Serviço de email - Autenticação</h1>
-
 <div class="container">
   <form action = "<?php echo htmlspecialchars($_SERVER['PHP_SELF']);
   ?>" method = "post">
@@ -60,8 +58,7 @@ h2 {
 </div>
 <?php
 if(isset($_POST['submit'])) {
-
-  $url = 'http://auth_service/server.php';
+  $url = 'http://auth/server.php';
   $ch = curl_init($url);
   $data = array(
     'token' => $_POST['token']
@@ -72,7 +69,6 @@ if(isset($_POST['submit'])) {
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   $result = curl_exec($ch);
   echo $result;
-  curl_close($ch);
   if($result == 1) {
     header("Location: http://localhost:8889/email.php");
     die();
@@ -80,6 +76,7 @@ if(isset($_POST['submit'])) {
   else {
     echo "<h2>Erro de autenticação! O Token inserido não é válido</h2>";
   }
+  curl_close($ch);
 }
 ?>
 </body>

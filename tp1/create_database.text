@@ -1,9 +1,0 @@
-
-passos para criar a primeira vez a base de dados no container bd
-
-su - postgres
-psql
-CREATE DATABASE AUTH;
-\c auth
-CREATE TABLE TOKENS(TOKEN VARCHAR(255) PRIMARY KEY NOT NULL, NAME TEXT NOT NULL, PASSWORD TEXT NOT NULL);
-

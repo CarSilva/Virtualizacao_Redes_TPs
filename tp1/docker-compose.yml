@@ -2,44 +2,48 @@ version: '2'
 services:
  db:
    image: postgres
+   container_name: postgres
    restart: always
    volumes:
-     - /home/$USER/Virtualiza-o_Redes_TPs/tp1/postgres_data:/var/lib/postgresql/data
+     - ./postgres_data:/var/lib/postgresql/data
+     - ./scripts_postgres:/docker-entrypoint-initdb.d
    networks:
      - network_1
- auth_service:
-   image: php:7.0-apache
-   container_name: auth_service
+ auth:
+   build: ./authentication_service
+   container_name: auth
    restart: always
    ports:
      - '8888:80'
    volumes:
-     - /home/$USER/Virtualiza-o_Redes_TPs/tp1/authentication_service:/var/www/html
+     - ./authentication_service:/var/www/html
    networks:
      - network_1
      - network_2
- mail_service:
+ mail:
    image: php:7.0-apache
-   container_name: mail_service
+   container_name: mail
    restart: always
    ports:
      - '8889:80'
    volumes:
-     - /home/$USER/Virtualiza-o_Redes_TPs/tp1/mail_service:/var/www/html
+     - ./mail_service:/var/www/html
    networks:
      - network_2
      - network_3
- mail:
+ mailServer:
    image: namshi/smtp
+   container_name: mailServer
    restart: always
    networks:
      - network_3
  haproxy:
    image: haproxy:1.7
+   container_name: haproxy
    ports:
      - '81:80'
    volumes:
-     - /home/$USER/Virtualiza-o_Redes_TPs/tp1/haproxy:/usr/local/etc/haproxy/
+     - ./haproxy:/usr/local/etc/haproxy/
    networks:
      - network_2
 networks:
