@@ -5,18 +5,39 @@
 ?>
 
 <?
-  function  insert_into_table($token, $name){
+  function get_connection(){
     $dbuser = postgres;
-    $dbpass = postgres;
     $conn;
     try {
-      $conn = new PDO("pgsql:host=db;dbname=auth", $dbuser, $dbpass);
+      $conn = new PDO("pgsql:host=db;dbname=auth", $dbuser, $dbuser);
     } catch (PDOException $e) {
       die('Connection failed: ' . $e->getMessage());
     }
+    return $conn;
+  }
+  function  insert_into_table($conn, $token, $name, $pass){
     $conn->beginTransaction();
-    $result = $conn->exec("INSERT INTO auth (token, name) VALUES ($token, $name)");
+    $result = $conn->exec("INSERT INTO tokens VALUES ('$token', '$name', '$pass');");
     $conn->commit();
+  }
+  function select_table($conn){
+    $sql = 'SELECT * FROM tokens;';
+    $table = $conn->query($sql);
+    return $table;
+  }
+  function exists_name($table, $name, $pass){
+    $result = -2;
+    foreach ($table as $row) {
+      if($row["name"] == $name && $row["password"] == $pass){
+        $result = $row["token"];
+        break;
+      }
+      else if($row["name"] == $name && $row["password"] != $pass){
+        $result = -1;
+        break;
+      }
+    }
+    return $result;
   }
 ?>
 
@@ -32,31 +53,24 @@
       <h1>Serviço de Autenticação</h1> 
       <div class = "container form-signin">
          <?php
-            $msg = '';
             $token = '';
-            $login;
-            //falta ir aqui buscar à bd
-            if (isset($_POST['login']) && !empty($_POST['username']) && !empty($_POST['password'])) {
-               if (!isset($login[$_POST['username']])){
-                  $login[$_POST['username']] = $_POST['password'];
-                  echo 'User added with success';
-                  $_SESSION['valid'] = true;
-                  $_SESSION['timeout'] = time();
-                  $_SESSION['username'] = $_POST['username'];
-                  $token = bin2hex(random_bytes(32));
-                  insert_into_table($token, $_POST['username']);
+            $conn = get_connection();
+            $table = select_table($conn);
+            if(isset($_POST['login']) && !empty($_POST['username']) && !empty($_POST['password'])){
+              $exists = exists_name($table, $_POST['username'], $_POST['password']);
 
-               }
-               //pode nao fazer sentido já, VER depois de por a funcionar bd
-               else if(!empty($login[$_POST['username']]) && $login[$_POST['username']] == $_POST['password']){
-                  $_SESSION['valid'] = true;
-                  $_SESSION['timeout'] = time();
-                  $_SESSION['username'] = $_POST['username'];
-                  $token = bin2hex(random_bytes(32));
-                  echo 'You have entered valid use name and password';
-               }else {
-                  $msg = 'Wrong username or password';
-               }
+              if($exists == -2){
+                $token = bin2hex(random_bytes(32));
+                insert_into_table($conn, $token, $_POST['username'], $_POST['password']);
+                echo "New user! Now registered";
+              }
+              else if($exists == -1){
+                echo "User exists, but wrong password, try again";
+                $token = "Please try again";
+              }
+              else{
+                $token = $exists;
+              }
             }
          ?>
       </div> <!-- /container -->
