@@ -35,9 +35,11 @@ services:
    networks:
      - network_3
  haproxy:
-   build: ./haproxy
+   image: haproxy:1.7
    ports:
-     - '80:80'
+     - '81:80'
+   volumes:
+     - /home/$USER/Virtualiza-o_Redes_TPs/tp1/haproxy:/usr/local/etc/haproxy/
    networks:
      - network_2
 networks:

@@ -61,7 +61,7 @@ h2 {
 <?php
 if(isset($_POST['submit'])) {
 
-  $url = 'http://auth/server.php';
+  $url = 'http://auth_service/server.php';
   $ch = curl_init($url);
   $data = array(
     'token' => $_POST['token']
