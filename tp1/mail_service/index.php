@@ -76,23 +76,27 @@ if(isset($_POST['validar'])) {
 }
 ?>
 <div class="container">
+  <table>
+  <tr>
   <form action ="" method = "post">
     <label for="token">Por favor insira o token de autenticação para ter acesso ao serviço:</label>
     <textarea id="subject" name="token" placeholder="Token..." style="height:35px"></textarea>
-    <input type="submit" value="Validar Token" name="validar">
+    <th><input type="submit" value="Validar Token" name="validar"></th>
   </form>
   <?php 
     if($result == 1){
       echo "<form action = \"servico2/email.php\" method=\"post\">
-          <input type=\"submit\" value=\"Enviar Email\" name=\"submit\">
+          <th><input type=\"submit\" value=\"Enviar Email\" name=\"submit\"></th>
         </form>";
     }
     else if ($result == 0){
       echo "<form action = \"servico1\" method=\"post\">
-          <input type=\"submit\" value=\"Autenticação\" name=\"submit\">
+          <th><input type=\"submit\" value=\"Autenticação\" name=\"submit\"></th>
         </form>";
     }
     ?>
+    </tr>
+    </table>
 </div>
 </body>
 </html>

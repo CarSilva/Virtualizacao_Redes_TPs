@@ -41,7 +41,7 @@ services:
    image: haproxy:1.7
    container_name: haproxy
    ports:
-     - '81:80'
+     - '9000:80'
    volumes:
      - ./haproxy:/usr/local/etc/haproxy/
    networks:
