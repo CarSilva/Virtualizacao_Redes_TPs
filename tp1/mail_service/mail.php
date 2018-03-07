@@ -51,7 +51,7 @@ h2 {
 <?php
 $action = '';
 if(isset($_POST['submit'])) {
-  $url = 'http://auth/server.php';
+  $url = 'http://172.82.0.2/server.php';
   $ch = curl_init($url);
   $data = array(
     'token' => $_POST['token']
@@ -63,7 +63,12 @@ if(isset($_POST['submit'])) {
   $result = curl_exec($ch);
   echo $result;
   if($result == 1) {
+<<<<<<< HEAD:tp1/mail_service/index.php
     $action = 1;
+=======
+    header("Location: http://172.82.0.3/email.php");
+    die();
+>>>>>>> 67ac85edc1d1a62b2d9f0beddfd15ad789772860:tp1/mail_service/mail.php
   }
   else {
     $action = 0;
