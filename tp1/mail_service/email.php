@@ -71,7 +71,7 @@ if(isset($_POST['submit'])) {
     //$mail->SMTPAuth = false;
     //$mail->Username = 'g1';
     //$mail->Password = 'g1';
-    $mail->setFrom('g1@g1.gcom.di.uminho.pt');
+    $mail->setFrom('g1@vr-g1.gcom.di.uminho.pt');
     $mail->addAddress($email);
     $mail->Subject = $assunto;
     $mail->Body    = $mensagem;
