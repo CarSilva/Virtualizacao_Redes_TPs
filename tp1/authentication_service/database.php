@@ -3,7 +3,7 @@ function get_connection(){
     $dbuser = postgres;
     $conn;
     try {
-      $conn = new PDO("pgsql:host=172.81.0.2;dbname=postgres", $dbuser, $dbuser);
+      $conn = new PDO("pgsql:host=db;dbname=postgres", $dbuser, $dbuser);
     } catch (PDOException $e) {
       die('Connection failed: ' . $e->getMessage());
     }

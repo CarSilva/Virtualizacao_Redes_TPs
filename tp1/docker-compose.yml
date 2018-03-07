@@ -8,8 +8,7 @@ services:
      - ./postgres_data:/var/lib/postgresql/data
      - ./scripts_postgres:/docker-entrypoint-initdb.d
    networks:
-     network_1:
-       ipv4_address: 172.81.0.2
+     - network_1
  auth:
    build: ./authentication_service
    container_name: auth
@@ -19,11 +18,8 @@ services:
    volumes:
      - ./authentication_service:/var/www/html
    networks:
-     network_1:
-       ipv4_address: 172.81.0.3
-     network_2:
-       ipv4_address: 172.82.0.2
-
+     - network_1
+     - network_2
  mail:
    image: php:7.0-apache
    container_name: mail
@@ -33,43 +29,27 @@ services:
    volumes:
      - ./mail_service:/var/www/html
    networks:
-     network_2:
-       ipv4_address: 172.82.0.3
-     network_3:
-       ipv4_address: 172.83.0.2
+     - network_2
+     - network_3
  mailServer:
    image: namshi/smtp
    container_name: mailServer
    restart: always
    networks:
-     network_3:
-       ipv4_address: 172.83.0.3
+     - network_3
  haproxy:
    image: haproxy:1.7
    container_name: haproxy
    ports:
-     - '80:80'
+     - '81:80'
    volumes:
      - ./haproxy:/usr/local/etc/haproxy/
    networks:
-     network_2:
-       ipv4_address: 172.82.0.4
+     - network_2
 networks:
     network_1:
       driver: bridge
-      ipam:
-        config:
-          - subnet: 172.81.0.0/16
-            gatway: 172.81.0.1
     network_2:
       driver: bridge
-      ipam:
-        config:
-          - subnet: 172.82.0.0/16
-            gateway: 172.82.0.1
     network_3:
       driver: bridge
-      ipam:
-        config:
-          - subnet: 172.83.0.0/16
-            gateway: 172.83.0.1
