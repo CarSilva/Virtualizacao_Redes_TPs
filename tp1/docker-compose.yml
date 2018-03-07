@@ -42,6 +42,7 @@ services:
    container_name: haproxy
    ports:
      - '9000:80'
+     - '443:443'
    volumes:
      - ./haproxy:/usr/local/etc/haproxy/
    networks:
