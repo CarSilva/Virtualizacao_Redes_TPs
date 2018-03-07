@@ -48,7 +48,11 @@ text-align: center;
 
 h2 {
   text-align: center;
-  color: red;
+  color: #4CAF50;
+}
+
+span{
+  color: #FF0000;
 }
 
 .container {

@@ -20,7 +20,7 @@ input[type=text], select, textarea {
 input[type=submit] {
     background-color: #4CAF50;
     color: white;
-    padding: 12px 20px;
+    padding: 5px 15px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -36,7 +36,11 @@ h1 {
 
 h2 {
   text-align: center;
-  color: red;
+  color: #4CAF50;
+}
+
+span{
+  color: #FF0000;
 }
 
 .container {
@@ -48,18 +52,12 @@ h2 {
 </head>
 <body>
 <h1>Serviço de email - Autenticação</h1>
-<div class="container">
-  <form action = "<?php echo htmlspecialchars($_SERVER['PHP_SELF']);
-  ?>" method = "post">
-    <label for="token">Por favor insira o token de autenticação para ter acesso ao serviço:</label>
-    <input type="text" id="token" name="token" placeholder="Token...">
-    <input type="submit" value="Submit" name="submit">
-  </form>
-</div>
 <?php
-if(isset($_POST['submit'])) {
+$result = -1;
+if(isset($_POST['validar'])) {
   $url = 'http://auth/server.php';
   $ch = curl_init($url);
+
   $data = array(
     'token' => $_POST['token']
    );
@@ -68,16 +66,33 @@ if(isset($_POST['submit'])) {
   curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   $result = curl_exec($ch);
-  echo $result;
-  if($result == 1) {
-    header("Location: http://localhost:8889/email.php");
-    die();
-  }
-  else {
-    echo "<h2>Erro de autenticação! O Token inserido não é válido</h2>";
+  if($result == 1){
+    echo "<h2> Token válido. Acesso ao serviço de email</h2>";
+
+  }else{
+    echo "<h2><span> Token inválido. Sem acesso ao serviço de email</span></h2>";
   }
   curl_close($ch);
 }
 ?>
+<div class="container">
+  <form action ="" method = "post">
+    <label for="token">Por favor insira o token de autenticação para ter acesso ao serviço:</label>
+    <textarea id="subject" name="token" placeholder="Token..." style="height:35px"></textarea>
+    <input type="submit" value="Validar Token" name="validar">
+  </form>
+  <?php 
+    if($result == 1){
+      echo "<form action = \"servico2/email.php\" method=\"post\">
+          <input type=\"submit\" value=\"Enviar Email\" name=\"submit\">
+        </form>";
+    }
+    else if ($result == 0){
+      echo "<form action = \"servico1\" method=\"post\">
+          <input type=\"submit\" value=\"Autenticação\" name=\"submit\">
+        </form>";
+    }
+    ?>
+</div>
 </body>
 </html>

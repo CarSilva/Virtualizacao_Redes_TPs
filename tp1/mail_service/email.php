@@ -44,8 +44,7 @@ h1 {
 <h1>Serviço de email</h1>
 
 <div class="container">
-  <form action = "<?php echo htmlspecialchars($_SERVER['PHP_SELF']);
-  ?>" method = "post">
+  <form action = "email.php" method = "post">
     <label for="email">Para:</label>
     <input type="text" id="email" name="email" placeholder="Email do destinatário...">
 
@@ -67,12 +66,12 @@ if(isset($_POST['submit'])) {
   $mail = new PHPMailer;
   try {
     $mail->isSMTP();
-    $mail->Host = 'mail';
+    $mail->Host = 'mailServer';
     $mail->Port = 25;
     //$mail->SMTPAuth = false;
     //$mail->Username = 'g1';
     //$mail->Password = 'g1';
-    //$mail->SMTPDebug = 2;
+    $mail->SMTPDebug = 2;
     $mail->setFrom('g1@g1.gcom.di.uminho.pt');
     $mail->addAddress($email);
     $mail->Subject = $assunto;

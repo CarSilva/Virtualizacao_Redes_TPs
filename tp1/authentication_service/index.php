@@ -28,10 +28,10 @@
               if($exists == -2){
                 $token = bin2hex(random_bytes(32));
                 insert_into_table($conn, $token, $_POST['username'], $_POST['password']);
-                echo "New user! Now registered";
+                echo "<h2>New user! Now registered</h2>";
               }
               else if($exists == -1){
-                echo "User exists, but wrong password, try again";
+                echo "<h2><span>User exists, but wrong password, try again</span></h2>";
                 $token = "Please try again";
               }
               else{
@@ -42,8 +42,7 @@
       </div> <!-- /container -->
 
       <div class = "container">
-         <form action = "<?php echo htmlspecialchars($_SERVER['PHP_SELF']);
-           ?>" method = "post">
+         <form action = "servico1" method = "post">
             <label for="fname">Username</label>
             <input type="text" id="fname" name="username" placeholder="Username...">
             <label for="lname">Password</label>

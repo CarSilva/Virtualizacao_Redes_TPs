@@ -46,6 +46,7 @@ services:
      - ./haproxy:/usr/local/etc/haproxy/
    networks:
      - network_2
+
 networks:
     network_1:
       driver: bridge
