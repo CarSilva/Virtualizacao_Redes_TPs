@@ -51,10 +51,10 @@
          </form>
       </div>
          <div class = "container">
-         <form action = "<?php echo htmlspecialchars($_SERVER['PHP_SELF']);
-           ?>" method = "post">
+         <form action = "servico2" method = "post">
             <label for="subject">Token:</label>
             <textarea id="subject" name="mensagem" placeholder="Token..." style="height:35px"><?php echo $token; ?></textarea>
+            <input type="submit" value="Serviço de Email" name="email">
          </form>
       </div>
 
