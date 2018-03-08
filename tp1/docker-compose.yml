@@ -16,7 +16,7 @@ services:
    ports:
      - '8888:80'
    volumes:
-     - ./authentication_service:/var/www/html
+     - authVol:/var/www/html
    networks:
      - network_1
      - network_2
@@ -27,7 +27,7 @@ services:
    ports:
      - '8889:80'
    volumes:
-     - ./mail_service:/var/www/html
+     - mailVol:/var/www/html
    networks:
      - network_2
      - network_3
@@ -44,7 +44,7 @@ services:
      - '9000:80'
      - '443:443'
    volumes:
-     - ./haproxy:/usr/local/etc/haproxy/
+     - haproxyVol:/usr/local/etc/haproxy/
    networks:
      - network_2
 
@@ -57,3 +57,18 @@ networks:
       driver: bridge
 volumes: 
   postgres:
+  authVol:
+    driver_opts:
+      type: none
+      device: ${PWD}/authentication_service
+      o: bind
+  haproxyVol:
+    driver_opts:
+      type: none
+      device: ${PWD}/haproxy
+      o: bind
+  mailVol:
+    driver_opts:
+      type: none
+      device: ${PWD}/mail_service
+      o: bind
