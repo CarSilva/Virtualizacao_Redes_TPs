@@ -10,4 +10,3 @@ RUN git clone https://github.com/mininet/mininet
 RUN mininet/util/install.sh -a
 EXPOSE 6653 6633
 
-
