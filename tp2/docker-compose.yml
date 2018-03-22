@@ -1,8 +1,8 @@
 version: '2'
 services:
-  mininet-source:
-    image: carlosilva96/virtualiza-o_redes_tps:latest
-    container_name: mininet-source
+  mininet:
+    image: carlosilva96/virtualiza-o_redes_tps
+    container_name: mininet
     restart: always
     privileged: true
     volumes: 
