@@ -1,8 +1,0 @@
-version: '2'
-services:
-  mininet:
-   build: .
-   container_name: mininet
-   restart: always
-   volumes:
-    - /lib/modules:/lib/modules
