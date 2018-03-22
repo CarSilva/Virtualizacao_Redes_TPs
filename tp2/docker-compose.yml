@@ -5,6 +5,10 @@ services:
     container_name: mininet
     restart: always
     privileged: true
+    tty: true
+    environment:
+      - DISPLAY
     volumes: 
       - /lib/modules:/lib/modules
       - ${PWD}/map:/home/ubuntu
+      - /tmp/.X11-unix:/tmp/.X11-unix
