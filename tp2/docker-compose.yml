@@ -1,18 +1,10 @@
 version: '2'
 services:
-  mininet:
-    image: carlosilva96/virtualiza-o_redes_tps:latest
-    container_name: mininet-apt
-    restart: always
-    privileged: true
-    tty: true   
-    volumes:
-      - /lib/modules:/lib/modules
   mininet-source:
     image: carlosilva96/virtualiza-o_redes_tps:mininet_source
     container_name: mininet-source
     restart: always
     privileged: true
-    tty: true
     volumes: 
       - /lib/modules:/lib/modules
+      - ${PWD}/map:/home/ubuntu
