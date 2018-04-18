@@ -5,3 +5,4 @@
 * [Carlos Silva](https://github.com/CarSilva)
 * [Bruno Machado](https://github.com/BrunoSMachado)
 * [Pedro Cunha](https://github.com/pedrocunha1596)
+* [José Silva](https://github.com/miguelsilva96)
