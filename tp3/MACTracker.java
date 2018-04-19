@@ -1,6 +1,7 @@
 package net.floodlightcontroller.mactracker;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -50,6 +51,8 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
 	protected Set<Long> macAddresses;
 	protected static Logger logger;
 	protected int i;
+	protected Set<String> macs_Balancer = new HashSet<>();
+	protected long last_statistic = System.currentTimeMillis();
 	protected StatisticsCollector statistics = new StatisticsCollector();
 
 	@Override
@@ -109,6 +112,9 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
 			IPv4Address newIP = IPv4Address.of("10.0.0.250");
 			ARP arp_req = (ARP) eth.getPayload();
 			if(arp_req.getTargetProtocolAddress().equals(newIP) && sw.getId().getLong() == 1) {
+				IPacket new_arp_req;
+				
+				
 				String mac = null;
 				if((i % 2) == 0) {
 					mac = "00:00:00:00:00:10";
@@ -138,17 +144,25 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
 			}
 		}			
 		long s = sw.getId().getLong();
-		/*DatapathId dId = sw.getId();
+		DatapathId dId = sw.getId();
 		Collection<OFPort> ports = sw.getEnabledPortNumbers();
 		for(OFPort p : ports) {
 			SwitchPortBandwidth bandwidth =  statistics.getBandwidthConsumption(dId, p);
 			if(bandwidth != null) {
-				System.out.println("###### Port: " + p.getPortNumber() + " SWITCH: "+s+" #########");
-				System.out.println( "RX:  " + (bandwidth.getBitsPerSecondRx().getValue()));
-				System.out.println( "TX:  " + (bandwidth.getBitsPerSecondTx().getValue()));
-				System.out.println("#################################");
+				long now = System.currentTimeMillis();
+				if(now - last_statistic >= 10000) {
+					long rx = bandwidth.getBitsPerSecondRx().getValue();
+					long tx = bandwidth.getBitsPerSecondRx().getValue();
+					long link_speed = bandwidth.getLinkSpeedBitsPerSec().getValue();
+					long available = link_speed - (rx + tx);
+					logger.info("SW: "+s+" Port: "+ p.getPortNumber() + " Link Speed: " + link_speed);
+					logger.info("SW: "+s+" Port: "+ p.getPortNumber() + " RX: " + rx);
+					logger.info("SW: "+s+" Port: "+ p.getPortNumber() + " TX: " + tx);
+					logger.info("SW: "+s+" Port: "+ p.getPortNumber() + " Bandwidth available: " + available);
+					last_statistic = System.currentTimeMillis();
+				}
 			}
-		}*/
+		}
 		switch (msg.getType()) {
 			case PACKET_IN:
 				if(s == 1) {
