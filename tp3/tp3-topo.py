@@ -5,6 +5,7 @@ from mininet.log import setLogLevel, info
 from mininet.node import RemoteController, OVSSwitch
 from mininet.cli import CLI
 from mininet.link import Link, TCLink
+import os
 
 class Anycast(Topo):
 
@@ -69,6 +70,10 @@ def run():
     dns2.cmd('ifconfig dns2-eth0:1 10.0.0.249 netmask 255.0.0.0')
     fs1.cmd('ifconfig fs1-eth0:1 10.0.0.250 netmask 255.0.0.0')
     fs2.cmd('ifconfig fs2-eth0:1 10.0.0.250 netmask 255.0.0.0')
+    dns1.cmd("apt-get install bind9")
+    fs1.cmd("apt-get install samba")
+    dns1.cmd("service bind9 restart")
+    fs1.cmd("service smbd restart")
     net.start()
     CLI(net)
     net.stop()
@@ -77,3 +82,4 @@ def run():
 if __name__ == '__main__':
     setLogLevel('info')
     run()
+    os.system("sudo mn -c")
