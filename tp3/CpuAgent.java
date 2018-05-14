@@ -43,6 +43,7 @@ public class CpuAgent {
 			ServerSocket server = new ServerSocket(portNumber);
 			Socket client;
 			while((client = server.accept()) != null){
+				System.out.println("NEW CLIENT  " + client.getInetAddress());
 			    PrintWriter out =
 			        new PrintWriter(client.getOutputStream(), true);
 			    out.println(getCpuIdle());
