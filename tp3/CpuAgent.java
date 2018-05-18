@@ -1,8 +1,8 @@
 import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.io.InputStreamReader;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
+import java.io.IOException;
 
 public class CpuAgent {
 
@@ -33,24 +33,31 @@ public class CpuAgent {
 
 	}
 
-	public static void main(String [] args){
-		if(args.length < 1) {
-			System.out.println("NEED PORT NUMBER");
-			System.exit(1);
-		}
-		int portNumber = Integer.parseInt(args[0]);
-		try {
-			ServerSocket server = new ServerSocket(portNumber);
-			Socket client;
-			while((client = server.accept()) != null){
-				System.out.println("NEW CLIENT  " + client.getInetAddress());
-			    PrintWriter out =
-			        new PrintWriter(client.getOutputStream(), true);
-			    out.println(getCpuIdle());
+	public static void main(String [] args) {
+		while(true) {
+			forwardingUDP("10.0.0.254", getCpuIdle());
+			try {
+				Thread.sleep(5000);
+			} catch(InterruptedException e) {
+				e.printStackTrace();
 			}
-		}catch(Exception e) {
-			e.printStackTrace();
 		}
 
 	}
+
+	private static void forwardingUDP(String ip, String msg) {
+        try {
+            InetAddress dest = InetAddress.getByName(ip);
+            byte[] sendData = new byte[1024];
+            DatagramSocket clientUDP = new DatagramSocket();
+            clientUDP.setBroadcast(true);
+            sendData = msg.getBytes();
+            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, dest, 9999);
+            clientUDP.send(sendPacket);
+            clientUDP.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
