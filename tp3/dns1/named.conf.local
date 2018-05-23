@@ -1,0 +1,9 @@
+zone    "tp3.local"   {
+        type master;
+        file    "/etc/bind/forward.tp3.local";
+ };
+
+zone   "0.0.10.in-addr.arpa"        {
+       type master;
+       file    "/etc/bind/reverse.tp3.local";
+ };
