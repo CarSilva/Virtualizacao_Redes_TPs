@@ -25,6 +25,7 @@ public class Server {
                 String recv_msg = new String(recv.getData());
                 String cleaned = recv_msg.substring(0, cmp(recv_msg));
                 String [] a = cleaned.split("&");
+                System.out.println("FUI USADO");
                 InetAddress dest = recv.getAddress();
                 switch(a[0]){
                     case "1":

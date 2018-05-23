@@ -26,7 +26,7 @@ public class Client {
                 switch (next) {
 
                     case "1":
-                        forwardingUDP(InetAddress.getByName("127.0.0.1"), next);
+                        forwardingUDP(InetAddress.getByName("10.0.0.250"), next);
                         buf = new byte[1024];
                         recv = new DatagramPacket(buf, buf.length);
                         server.receive(recv);
@@ -74,7 +74,9 @@ public class Client {
                         sb = new StringBuilder();
                         System.out.println(initMenu());
                         break;
-
+                    case "0":
+                        System.exit(1);
+                        break;
                     default:
                         System.out.println("NOT SUPPORTED OPTION");
                 }
@@ -87,7 +89,7 @@ public class Client {
 
     public static List<String> readFile(String name){
         List<String> file = new ArrayList<>();
-        Path path = Paths.get("files/" + name);
+        Path path = Paths.get(name);
         try {
             file = Files.readAllLines(path);
         } catch (IOException e) {
@@ -124,6 +126,7 @@ public class Client {
 
     public static String initMenu(){
         StringBuilder sb = new StringBuilder();
+        sb.append("0.Sair\n");
         sb.append("1.Listar Ficheiros\n");
         sb.append("2.Efetuar Download\n");
         sb.append("3.Efetuar Upload\n");
