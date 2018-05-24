@@ -3,8 +3,8 @@ options {
         auth-nxdomain no;    # conform to RFC1035
         listen-on port 53 {
             localhost;
-            10.0.0.4/24; };
-        allow-query { localhost; 10.0.0.4/24; };
+            10.0.0.4/8; };
+        allow-query { localhost; 10.0.0.4/8; };
         forwarders { 8.8.8.8; };
         recursion yes;
         };

@@ -17,7 +17,8 @@ public class Server {
     public static void main(String [] args) {
         byte[] buf;
         try {
-            DatagramSocket server = new DatagramSocket(11111);
+            InetAddress bind = InetAddress.getByName("10.0.0.250");
+            DatagramSocket server = new DatagramSocket(11111, bind);
             while(true){
                 buf = new byte[1024];
                 DatagramPacket recv = new DatagramPacket(buf, buf.length);
