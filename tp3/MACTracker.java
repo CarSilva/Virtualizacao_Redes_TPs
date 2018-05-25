@@ -9,7 +9,6 @@ import org.projectfloodlight.openflow.protocol.OFMessage;
 import org.projectfloodlight.openflow.protocol.OFPacketOut;
 import org.projectfloodlight.openflow.protocol.OFType;
 import org.projectfloodlight.openflow.protocol.action.OFAction;
-import org.projectfloodlight.openflow.types.DatapathId;
 import org.projectfloodlight.openflow.types.EthType;
 import org.projectfloodlight.openflow.types.IPv4Address;
 import org.projectfloodlight.openflow.types.IpProtocol;
@@ -25,14 +24,7 @@ import net.floodlightcontroller.core.module.IFloodlightService;
 
 import net.floodlightcontroller.core.IFloodlightProviderService;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.Set;
 
 import net.floodlightcontroller.packet.ARP;
 import net.floodlightcontroller.packet.Data;
@@ -46,24 +38,23 @@ import net.floodlightcontroller.statistics.SwitchPortBandwidth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.security.ntlm.Client;
 
 public class MACTracker implements IOFMessageListener, IFloodlightModule {
 
+	
 	protected IFloodlightProviderService floodlightProvider;
-	protected Set<Long> macAddresses;
 	protected static Logger logger;
-	protected int i = 0;
-	protected Map<IPv4Address, MacAddress> ipMac = new HashMap<>();
-	protected Map<IPv4Address, Double> cpus = new HashMap<>();
-	protected Map<Integer, Long > band_port = new HashMap<>();
-	protected int lastDns = 0;
-	protected long last_statistic = System.currentTimeMillis();
-	protected StatisticsCollector statistics = new StatisticsCollector();
-
+	protected int i;
+	protected Map<IPv4Address, MacAddress> ipMac;
+	protected Map<IPv4Address, Double> cpus;
+	protected Map<Integer, Long > band_port;
+	protected int lastDns;
+	protected long last_statistic;
+	protected StatisticsCollector statistics;
+	
 	@Override
 	public String getName() {
-		return MACTracker.class.getSimpleName();
+	    return MACTracker.class.getSimpleName();
 	}
 
 	@Override
@@ -74,13 +65,17 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
 
 	@Override
 	public boolean isCallbackOrderingPostreq(OFType type, String name) {
-		// TODO Auto-generated method stub
-		return false;
+		 if (type.equals(OFType.PACKET_IN) && (name.equals("forwarding"))) {
+	            return true;
+	     } else {
+	            return false;
+	     }
 	}
 
 	@Override
 	public Collection<Class<? extends IFloodlightService>> getModuleServices() {
-	    return null;
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
@@ -91,24 +86,29 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
 
 	@Override
 	public Collection<Class<? extends IFloodlightService>> getModuleDependencies() {
-		 Collection<Class<? extends IFloodlightService>> l =
-	     new ArrayList<Class<? extends IFloodlightService>>();
-	     l.add(IFloodlightProviderService.class);
-		 return l;
+	    Collection<Class<? extends IFloodlightService>> l =
+	        new ArrayList<Class<? extends IFloodlightService>>();
+	    l.add(IFloodlightProviderService.class);
+	    return l;
 	}
 
 	@Override
 	public void init(FloodlightModuleContext context) throws FloodlightModuleException {
-		 i = 0;
-		 floodlightProvider = context.getServiceImpl(IFloodlightProviderService.class);
-		 macAddresses = new ConcurrentSkipListSet<Long>();
-		 logger = LoggerFactory.getLogger(MACTracker.class);
+	    this.floodlightProvider = context.getServiceImpl(IFloodlightProviderService.class);
+	    this.logger = LoggerFactory.getLogger(MACTracker.class);
+	    this.i = 0;
+	    this.ipMac = new HashMap<>();
+	    this.cpus = new HashMap<>();
+	    this.band_port = new HashMap<>();
+	    this.lastDns = 0;
+	    this.last_statistic = System.currentTimeMillis();
+	    this.statistics = new StatisticsCollector();
 	}
 
 	@Override
-	public void startUp(FloodlightModuleContext context) throws FloodlightModuleException {
-		floodlightProvider.addOFMessageListener(OFType.PACKET_IN, this);
-
+	public void startUp(FloodlightModuleContext context) {
+	    floodlightProvider.addOFMessageListener(OFType.PACKET_IN, this);
+	    
 	}
 
 	@Override
@@ -125,8 +125,8 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
 		Ethernet eth = IFloodlightProviderService.bcStore.get(cntx, IFloodlightProviderService.CONTEXT_PI_PAYLOAD);
 		String infoCpu = "";
 		if(msg.getType() == OFType.PACKET_IN ) {
-			/* Recebe informação dos CPUs dos Servidores de ficheiros
-			recebe pacote udp 5 em 5 do cpu agent */
+			/* Recebe informação dos CPUs dos Servidores de ficheiros*/
+			
 			if(eth.getEtherType() == EthType.IPv4) {
 				IPv4 ipv4 = (IPv4) eth.getPayload();
 				if(ipv4.getDestinationAddress().equals(broadcast) && ipv4.getProtocol() == IpProtocol.UDP) {
@@ -141,8 +141,9 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
 					double cpu_idle = Double.parseDouble(output);
 					cpus.put(ipv4.getSourceAddress(), cpu_idle);
 					ipMac.put(ipv4.getSourceAddress(), eth.getSourceMACAddress());
+					return Command.STOP;
 				}
-				else if(ipv4.getDestinationAddress().equals(any_fileServer) && eth.getSourceMACAddress.equals(broad_mac) &&
+				else if(ipv4.getDestinationAddress().equals(any_fileServer) && eth.getDestinationMACAddress().equals(broad_mac) &&
 						ipv4.getProtocol() == IpProtocol.UDP) {
 					double min = Integer.MAX_VALUE;
 					IPv4Address ip_forward = null;
@@ -155,9 +156,10 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
 					}
 					System.out.println("HEY" + ip_forward + " " + s);
 					buildIpv4Udp(sw, eth, ipv4, ip_forward);
+					return Command.STOP;
 				}
 				else if(ipv4.getSourceAddress().equals(client1) && ipv4.getDestinationAddress().equals(any_dns) &&
-						eth.getSourceMACAddress.equals(broad_mac) && ipv4.getProtocol() == IpProtocol.UDP) {
+						eth.getDestinationMACAddress().equals(broad_mac) && ipv4.getProtocol() == IpProtocol.UDP) {
 						if(lastDns == 0) {
 							buildIpv4Udp(sw, eth, ipv4, dns_1);
 							lastDns = 1;
@@ -167,12 +169,14 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
 							buildIpv4Udp(sw, eth, ipv4, dns_2);
 							lastDns = 0;
 						}
+						return Command.STOP;
 					}
 				else if(ipv4.getSourceAddress().equals(client2) && ipv4.getDestinationAddress().equals(any_dns) &&
-						eth.getSourceMACAddress.equals(broad_mac) && ipv4.getProtocol() == IpProtocol.UDP) {
+						eth.getDestinationMACAddress().equals(broad_mac) && ipv4.getProtocol() == IpProtocol.UDP) {
 						buildIpv4Udp(sw, eth, ipv4, dns_1);
+						return Command.STOP;
 					}
-					return Command.STOP;
+					
 				}
 			/* Envia MAC com broadcast associando este ao ip do pedido */
 			if(eth.getEtherType() == EthType.ARP) {
