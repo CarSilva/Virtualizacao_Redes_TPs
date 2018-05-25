@@ -180,32 +180,40 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
 				}
 			/* Envia MAC com broadcast associando este ao ip do pedido */
 			if(eth.getEtherType() == EthType.ARP) {
+				
 				ARP arp = (ARP) eth.getPayload();
+				System.out.println(arp.getTargetProtocolAddress() + " " + arp.getTargetHardwareAddress() + " " +s);
 				if(arp.getTargetProtocolAddress().equals(broadcast)) {
+					System.out.println("HELLOOOOOOOOOOOO");
 					buildArp(sw, arp, eth, broadcast, broad_mac);
 					if(i == 0) {
+						System.out.println("SKHGADDDDDDDDDDDDDDDDDD");
 						request_arp(arp, eth, sw, any_dns, broad_mac);
 						i++;
 					}
 					return Command.STOP;
 				}
-				else if(arp.getTargetProtocolAddress().equals(any_fileServer)){
+				else if(arp.getTargetProtocolAddress().equals(any_fileServer) && 
+									!arp.getTargetHardwareAddress().equals(broad_mac)){
 						System.out.println("heloo +  " + s);
 						buildArp(sw, arp, eth, any_fileServer, broad_mac);
 						return Command.STOP;
 					}
-				else if(arp.getTargetProtocolAddress().equals(any_dns)) {
+				else if(arp.getTargetProtocolAddress().equals(any_dns) &&
+									!arp.getTargetHardwareAddress().equals(broad_mac)) {
 						buildArp(sw, arp, eth, any_dns, broad_mac);
 						return Command.STOP;
 					}
 				else if(s == 3) {
 					if(arp.getSenderProtocolAddress().equals(any_dns)) {
+						System.out.println("HEELO FROM THE OTHE");
 						ipMac.put(dns_1, arp.getSenderHardwareAddress());
 						return Command.STOP;
 					}
 				}
 				else if(s == 7) {
 					if(arp.getSenderProtocolAddress().equals(any_dns)) {
+						System.out.println("HEELO FROM THE OTHE side");
 						ipMac.put(dns_2, arp.getSenderHardwareAddress());
 						return Command.STOP;
 					}
