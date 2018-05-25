@@ -1,24 +1,22 @@
-$TTL    604800
+;
+; SOA
+;
+$TTL 1h
+@   IN SOA dns1.tp3.local. root.tp3.local. (
+        1 ; Serial number (YYYYMMDDnn)
+        1h ; Slave refresh
+        15m ; Slave retry
+        2w ; Slave expire
+        1h ; Cache TTL
+     )
+;
+; NS RECORDS
+;
+@   IN   NS  dns1.tp3.local.
+;
+; A RECORDS
+;
 
-@       IN      SOA     dns1.tp3.local. root.dns1.tp3.local. (
-                              6         ; Serial
-                         604820         ; Refresh
-                          86600         ; Retry
-                        2419600         ; Expire
-                         604600 )       ; Negative Cache TTL
-
-;Name Server Information
-@       IN      NS      dns1.tp3.local.
-
-;IP address of Your Domain Name Server(DNS)
-dns1 IN       A      10.0.0.3
-
-;Mail Server MX (Mail exchanger) Record
-tp3.local. IN  MX  10  mail.tp3.local.
-
-;A Record for Host names
-www     IN       A       192.168.0.50
-mail    IN       A       192.168.0.60
-
-;CNAME Record
-ftp     IN      CNAME    www.tp3.local.
+tp3.local.    IN A 10.0.0.249
+@       			IN A 10.0.0.249
+dns1         	IN A 10.0.0.249

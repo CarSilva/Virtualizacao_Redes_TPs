@@ -1,11 +1,5 @@
 zone    "tp3.local"   {
         type slave;
         file    "slave/forward.tp3.local";
-        masters{10.0.0.249;};
- };
-
-zone   "0.0.10.in-addr.arpa"        {
-        type slave;
-        file    "slave/reverse.tp3.local";
-        masters{10.0.0.249;};
+        masters{10.0.0.3;};
  };
