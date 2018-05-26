@@ -128,7 +128,9 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
 			/* Recebe informação dos CPUs dos Servidores de ficheiros*/
 			
 			if(eth.getEtherType() == EthType.IPv4) {
+				
 				IPv4 ipv4 = (IPv4) eth.getPayload();
+				System.out.println(ipv4.getSourceAddress() + " " +s + " " + ipv4.getDestinationAddress());
 				if(ipv4.getDestinationAddress().equals(broadcast) && ipv4.getProtocol() == IpProtocol.UDP) {
 					UDP udp = (UDP) ipv4.getPayload();
 					Data info = (Data) udp.getPayload();
@@ -155,67 +157,70 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
 						}
 					}
 					System.out.println("HEY" + ip_forward + " " + s);
-					buildIpv4Udp(sw, eth, ipv4, ip_forward);
+					buildIpv4Udp(sw, eth, ipv4, ip_forward, true);
 					return Command.STOP;
 				}
 				else if(ipv4.getSourceAddress().equals(client1) && ipv4.getDestinationAddress().equals(any_dns) &&
 						eth.getDestinationMACAddress().equals(broad_mac) && ipv4.getProtocol() == IpProtocol.UDP) {
 						if(lastDns == 0) {
-							buildIpv4Udp(sw, eth, ipv4, dns_1);
+							System.out.println("!!1!!!" + ipMac.get(dns_1));
+							buildIpv4Udp(sw, eth, ipv4, dns_1, false);
 							lastDns = 1;
 						}
 
 						else {
-							buildIpv4Udp(sw, eth, ipv4, dns_2);
+							System.out.println("!!2!!!" + ipMac.get(dns_2));
+							buildIpv4Udp(sw, eth, ipv4, dns_2, false);
 							lastDns = 0;
 						}
 						return Command.STOP;
 					}
 				else if(ipv4.getSourceAddress().equals(client2) && ipv4.getDestinationAddress().equals(any_dns) &&
 						eth.getDestinationMACAddress().equals(broad_mac) && ipv4.getProtocol() == IpProtocol.UDP) {
-						buildIpv4Udp(sw, eth, ipv4, dns_1);
+						buildIpv4Udp(sw, eth, ipv4, dns_1, false);
 						return Command.STOP;
 					}
 					
 				}
 			/* Envia MAC com broadcast associando este ao ip do pedido */
 			if(eth.getEtherType() == EthType.ARP) {
-				
 				ARP arp = (ARP) eth.getPayload();
-				System.out.println(arp.getTargetProtocolAddress() + " " + arp.getTargetHardwareAddress() + " " +s);
 				if(arp.getTargetProtocolAddress().equals(broadcast)) {
-					System.out.println("HELLOOOOOOOOOOOO");
 					buildArp(sw, arp, eth, broadcast, broad_mac);
 					if(i == 0) {
-						System.out.println("SKHGADDDDDDDDDDDDDDDDDD");
 						request_arp(arp, eth, sw, any_dns, broad_mac);
 						i++;
 					}
 					return Command.STOP;
 				}
 				else if(arp.getTargetProtocolAddress().equals(any_fileServer) && 
-									!arp.getTargetHardwareAddress().equals(broad_mac)){
+									!arp.getTargetHardwareAddress().equals(broad_mac)&&
+									arp.getOpCode() == ARP.OP_REQUEST){
 						System.out.println("heloo +  " + s);
 						buildArp(sw, arp, eth, any_fileServer, broad_mac);
 						return Command.STOP;
 					}
 				else if(arp.getTargetProtocolAddress().equals(any_dns) &&
-									!arp.getTargetHardwareAddress().equals(broad_mac)) {
-						buildArp(sw, arp, eth, any_dns, broad_mac);
+									!arp.getTargetHardwareAddress().equals(broad_mac) &&
+									arp.getOpCode() == ARP.OP_REQUEST) {
+						buildArp(sw, arp, eth, any_dns, broad_mac);							
 						return Command.STOP;
 					}
 				else if(s == 3) {
 					if(arp.getSenderProtocolAddress().equals(any_dns)) {
-						System.out.println("HEELO FROM THE OTHE");
-						ipMac.put(dns_1, arp.getSenderHardwareAddress());
-						return Command.STOP;
+						if(arp.getOpCode() == ARP.OP_REPLY) {
+							ipMac.put(dns_1, arp.getSenderHardwareAddress());
+							return Command.STOP;
+						}
+						
 					}
 				}
 				else if(s == 7) {
 					if(arp.getSenderProtocolAddress().equals(any_dns)) {
-						System.out.println("HEELO FROM THE OTHE side");
-						ipMac.put(dns_2, arp.getSenderHardwareAddress());
-						return Command.STOP;
+						if(arp.getOpCode() == ARP.OP_REPLY) {
+							ipMac.put(dns_2, arp.getSenderHardwareAddress());
+							return Command.STOP;
+						}
 					}
 				}
 
@@ -254,9 +259,16 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
 	    return Command.CONTINUE;
 	}
 
-	private void buildIpv4Udp(IOFSwitch sw, Ethernet eth, IPv4 ipv4, IPv4Address ip_forward) {
-		IPv4Address any_fileServer = IPv4Address.of("10.0.0.250");
+	private void buildIpv4Udp(IOFSwitch sw, Ethernet eth, IPv4 ipv4, IPv4Address ip_forward, boolean dns_file) {
+		IPv4Address any_cast;
+		if(dns_file) {
+			any_cast = IPv4Address.of("10.0.0.250");
+		} else {
+			any_cast = IPv4Address.of("10.0.0.249");
+		}
+		
 		UDP udp = (UDP) ipv4.getPayload();
+		System.out.println(udp.getDestinationPort());
 		Data data = (Data) udp.getPayload();
 		IPacket udp_ree = new Ethernet()
 				.setSourceMACAddress(eth.getSourceMACAddress())
@@ -265,7 +277,7 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
 				.setPayload(
 						new IPv4()
 						.setSourceAddress(ipv4.getSourceAddress())
-						.setDestinationAddress(any_fileServer)
+						.setDestinationAddress(any_cast)
 						.setTtl((byte) 64)
 						.setProtocol(IpProtocol.UDP)
 						.setPayload(
