@@ -1,9 +1,11 @@
 zone    "tp3.local"   {
         type master;
-        file    "/home/axemaxine/Desktop/Virtualiza-o_Redes_TPs/tp3/dns1/forward.tp3.local";
+        file    "/home/carlos/Virtualiza-o_Redes_TPs/tp3/dns1/db.tp3.local";
+        allow-transfer { 10.0.0.4; };
  };
 
- zone "207.168.192-in-addr.arpa"{
+ zone "10.in-addr.arpa"{
     type master;
-    file "/home/axemaxine/Desktop/Virtualiza-o_Redes_TPs/tp3/dns1/db.207.168.192";
+    file "/home/carlos/Virtualiza-o_Redes_TPs/tp3/dns1/db.10";
+    allow-transfer { 10.0.0.4; };
 };
