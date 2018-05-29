@@ -9,6 +9,7 @@ import org.projectfloodlight.openflow.protocol.OFMessage;
 import org.projectfloodlight.openflow.protocol.OFPacketOut;
 import org.projectfloodlight.openflow.protocol.OFType;
 import org.projectfloodlight.openflow.protocol.action.OFAction;
+import org.projectfloodlight.openflow.types.DatapathId;
 import org.projectfloodlight.openflow.types.EthType;
 import org.projectfloodlight.openflow.types.IPv4Address;
 import org.projectfloodlight.openflow.types.IpProtocol;
@@ -47,10 +48,11 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
 	protected int i;
 	protected Map<IPv4Address, MacAddress> ipMac;
 	protected Map<IPv4Address, Double> cpus;
-	protected Map<Integer, Long > band_port;
+	protected Map<IPv4Address, Long > band_port;
 	protected int lastDns;
 	protected long last_statistic;
 	protected StatisticsCollector statistics;
+	protected IPv4Address lastIpReached;
 	
 	@Override
 	public String getName() {
@@ -103,6 +105,7 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
 	    this.lastDns = 0;
 	    this.last_statistic = System.currentTimeMillis();
 	    this.statistics = new StatisticsCollector();
+	    this.lastIpReached = IPv4Address.of("10.2.2.2");
 	}
 
 	@Override
@@ -124,13 +127,45 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
 		long s = sw.getId().getLong();
 		Ethernet eth = IFloodlightProviderService.bcStore.get(cntx, IFloodlightProviderService.CONTEXT_PI_PAYLOAD);
 		String infoCpu = "";
+		
+		if(s == 1) {
+			DatapathId dId = sw.getId();
+			Collection<OFPort> ports = sw.getEnabledPortNumbers();
+			long now = System.currentTimeMillis();
+			if(now - last_statistic >= 10000) {
+				for(OFPort p : ports) {
+					SwitchPortBandwidth bandwidth =  statistics.getBandwidthConsumption(dId, p);
+					if(bandwidth != null) {
+						IPv4Address ip;
+						 if(p.getPortNumber() == 3 || p.getPortNumber() == 4) {
+							long rx = bandwidth.getBitsPerSecondRx().getValue();
+							long tx = bandwidth.getBitsPerSecondRx().getValue();
+							long link_speed = bandwidth.getLinkSpeedBitsPerSec().getValue();
+							long used_bandwidth = rx + tx;
+							if (used_bandwidth < 0) {used_bandwidth = 0;}
+							long available = link_speed - used_bandwidth;
+							available = available/1000000;
+							if(p.getPortNumber() == 3) {
+								ip = IPv4Address.of("10.0.0.5");
+							}else {
+								ip = IPv4Address.of("10.0.0.6");
+							}
+							band_port.put(ip, available);
+						}
+					}
+				}
+				last_statistic = System.currentTimeMillis();
+			}
+			
+		}
+		
 		if(msg.getType() == OFType.PACKET_IN ) {
 			/* Recebe informação dos CPUs dos Servidores de ficheiros*/
 			
 			if(eth.getEtherType() == EthType.IPv4) {
 				
 				IPv4 ipv4 = (IPv4) eth.getPayload();
-				System.out.println(ipv4.getSourceAddress() + " " +s + " " + ipv4.getDestinationAddress());
+				System.out.println(ipv4.getSourceAddress() + "   " + ipv4.getDestinationAddress() + " " + eth.getDestinationMACAddress() + " " + s);
 				if(ipv4.getDestinationAddress().equals(broadcast) && ipv4.getProtocol() == IpProtocol.UDP) {
 					UDP udp = (UDP) ipv4.getPayload();
 					Data info = (Data) udp.getPayload();
@@ -149,26 +184,27 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
 						ipv4.getProtocol() == IpProtocol.UDP) {
 					double min = Integer.MAX_VALUE;
 					IPv4Address ip_forward = null;
+
 					for(IPv4Address ip : cpus.keySet()) {
 						double cpu_idle = cpus.get(ip);
-						if(cpu_idle <= min ) {
-							min = cpu_idle;
+						if(cpu_idle <= min && !ip.equals(lastIpReached)) {
+							min = cpu_idle + band_port.get(ip);
 							ip_forward = ip;
 						}
 					}
-					System.out.println("HEY" + ip_forward + " " + s);
+					this.lastIpReached = ip_forward;
 					buildIpv4Udp(sw, eth, ipv4, ip_forward, true);
 					return Command.STOP;
 				}
 				else if(ipv4.getSourceAddress().equals(client1) && ipv4.getDestinationAddress().equals(any_dns) &&
 						eth.getDestinationMACAddress().equals(broad_mac) && ipv4.getProtocol() == IpProtocol.UDP) {
+						System.out.println("HELLO");
 						if(lastDns == 0) {
 							System.out.println("!!1!!!" + ipMac.get(dns_1));
 							buildIpv4Udp(sw, eth, ipv4, dns_1, false);
 							lastDns = 1;
 						}
-
-						else {
+						else if(lastDns == 1) {
 							System.out.println("!!2!!!" + ipMac.get(dns_2));
 							buildIpv4Udp(sw, eth, ipv4, dns_2, false);
 							lastDns = 0;
@@ -196,7 +232,6 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
 				else if(arp.getTargetProtocolAddress().equals(any_fileServer) && 
 									!arp.getTargetHardwareAddress().equals(broad_mac)&&
 									arp.getOpCode() == ARP.OP_REQUEST){
-						System.out.println("heloo +  " + s);
 						buildArp(sw, arp, eth, any_fileServer, broad_mac);
 						return Command.STOP;
 					}
@@ -226,36 +261,6 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
 
 			}
 		}
-
-
-		/*************************BANDWIDTH**********************/
-		/*
-		DatapathId dId = sw.getId();
-		Collection<OFPort> ports = sw.getEnabledPortNumbers();
-		for(OFPort p : ports) {
-			SwitchPortBandwidth bandwidth =  statistics.getBandwidthConsumption(dId, p);
-			if(bandwidth != null) {
-				long now = System.currentTimeMillis();
-				if(now - last_statistic >= 10000) {
-					long rx = bandwidth.getBitsPerSecondRx().getValue();
-					long tx = bandwidth.getBitsPerSecondRx().getValue();
-					long link_speed = bandwidth.getLinkSpeedBitsPerSec().getValue();
-					long used_bandwidth = rx + tx;
-					if (used_bandwidth < 0) {used_bandwidth = 0;}
-					long available = link_speed - used_bandwidth;
-					logger.info("SW: "+s+" Port: "+ p.getPortNumber() + " Link Speed: " + link_speed);
-					logger.info("SW: "+s+" Port: "+ p.getPortNumber() + " RX: " + rx);
-					logger.info("SW: "+s+" Port: "+ p.getPortNumber() + " TX: " + tx);
-					logger.info("SW: "+s+" Port: "+ p.getPortNumber() + " Bandwidth available: " + available);
-					if(s==2) {
-						band_port.put(p.getPortNumber(), available);
-					}
-					last_statistic = System.currentTimeMillis();
-				}
-			}
-		}
-		/*******************FIM_BANDWIDTH*****************/
-
 	    return Command.CONTINUE;
 	}
 
@@ -268,7 +273,6 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
 		}
 		
 		UDP udp = (UDP) ipv4.getPayload();
-		System.out.println(udp.getDestinationPort());
 		Data data = (Data) udp.getPayload();
 		IPacket udp_ree = new Ethernet()
 				.setSourceMACAddress(eth.getSourceMACAddress())
@@ -336,7 +340,7 @@ public class MACTracker implements IOFMessageListener, IFloodlightModule {
 						.setTargetProtocolAddress(ip));
 		sendPacket(new_arp_req, sw);
 	}
-
+	
 	private void sendPacket(IPacket arp_rep, IOFSwitch sw) {
 		List<OFAction> list = new ArrayList<>();
 		list.add(sw.getOFFactory().actions().output(OFPort.FLOOD,  0xffFFffFF));
