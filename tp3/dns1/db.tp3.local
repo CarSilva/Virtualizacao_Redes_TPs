@@ -20,5 +20,5 @@ dns1.tp3.local.          IN      A       10.0.0.249
 dns2.tp3.local.          IN      A       10.0.0.249
 
 ; 10.0.0.0/8 - A records
-client1.tp3.local.        IN      A      10.0.0.1
+client1.tp3.local.        IN      A      10.0.0.4
 client2.tp3.local.        IN      A      10.0.0.2

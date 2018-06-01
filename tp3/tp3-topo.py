@@ -75,8 +75,6 @@ def run():
     dns2.cmd('ifconfig dns2-eth0:1 10.0.0.249 netmask 255.0.0.0')
     fs1.cmd('ifconfig fs1-eth0:1 10.0.0.250 netmask 255.0.0.0')
     fs2.cmd('ifconfig fs2-eth0:1 10.0.0.250 netmask 255.0.0.0')
-    dns1.cmd("apt-get install --yes bind9")
-    dns1.cmd("service bind9 restart")
     net.start()
     CLI(net)
     net.stop()
